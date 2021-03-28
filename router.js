@@ -1,31 +1,62 @@
 const router = require('express').Router();
 const station = require('./models/stationModel');
 const connection = require('./models/connectionModel');
+const rectangleHelper = require('./rectangleHelper');
 
 // Get all stations, default limit 10 or based on query
 router.route('/').get(async (req, res) => {
-  const { limit } = req.query;
-
   try {
-    res.send(
-      await station
-        .find()
-        .limit(limit ? parseInt(limit) : 10)
-        .populate({
-          path: 'Connections',
-          populate: [
-            {
-              path: 'ConnectionTypeID',
-            },
-            {
-              path: 'CurrentTypeID',
-            },
-            {
-              path: 'LevelID',
-            },
-          ],
-        })
-    );
+    const { limit, topRight, bottomLeft } = req.query;
+
+    // Limit the area if query params include both values
+    if (topRight && bottomLeft) {
+      const limitedArea = rectangleHelper.rectangleBounds(
+        JSON.parse(topRight),
+        JSON.parse(bottomLeft)
+      );
+
+      res.send(
+        await station
+          .find()
+          .where('Location')
+          .within(limitedArea)
+          .limit(limit ? parseInt(limit) : 10)
+          .populate({
+            path: 'Connections',
+            populate: [
+              {
+                path: 'ConnectionTypeID',
+              },
+              {
+                path: 'CurrentTypeID',
+              },
+              {
+                path: 'LevelID',
+              },
+            ],
+          })
+      );
+    } else {
+      res.send(
+        await station
+          .find()
+          .limit(limit ? parseInt(limit) : 10)
+          .populate({
+            path: 'Connections',
+            populate: [
+              {
+                path: 'ConnectionTypeID',
+              },
+              {
+                path: 'CurrentTypeID',
+              },
+              {
+                path: 'LevelID',
+              },
+            ],
+          })
+      );
+    }
   } catch (e) {
     res.send(`Failed to fetch the stations ${e.message}`);
   }
@@ -124,8 +155,12 @@ router.put('/', async (req, res) => {
 
 // Delete station
 router.delete('/:id', async (req, res) => {
-  const del = await station.deleteOne({ _id: req.params.id });
-  res.send(`deleted ${del.deletedCount} station`);
+  try {
+    const del = await station.deleteOne({ _id: req.params.id });
+    res.send(`deleted ${del.deletedCount} station`);
+  } catch (e) {
+    res.send(`Failed to delete the station ${e.message}`);
+  }
 });
 
 module.exports = router;
