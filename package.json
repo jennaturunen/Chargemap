@@ -1,0 +1,25 @@
+{
+  "name": "chargemap",
+  "version": "1.0.0",
+  "description": "Server-side Scripting Frameworks-course, week 2 Chargemap assingment",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jennaturunen/Chargemap.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jennaturunen/Chargemap/issues"
+  },
+  "homepage": "https://github.com/jennaturunen/Chargemap#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.12.2"
+  }
+}
