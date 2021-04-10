@@ -2,6 +2,9 @@ const router = require('express').Router();
 const station = require('./models/stationModel');
 const connection = require('./models/connectionModel');
 const rectangleHelper = require('./rectangleHelper');
+require('./models/currentTypeModel');
+require('./models/connectionTypeModel');
+require('./models/levelModel');
 
 // Get all stations, default limit 10 or based on query
 router.route('/').get(async (req, res) => {
@@ -94,8 +97,9 @@ router.post('/', async (req, res) => {
     const connectionIds = await Promise.all(
       connections.map(async (con) => {
         const newConnection = new connection(con);
-        await newConnection.save();
-        return newConnection._id;
+        const createdConnection = await connection.create(newConnection);
+        await createdConnection.save();
+        return createdConnection._id;
       })
     );
 
@@ -118,7 +122,7 @@ router.post('/', async (req, res) => {
 // Modify station
 router.put('/', async (req, res) => {
   try {
-    const { Station, Connections } = req.body;
+    const { Station, Connections } = await req.body;
 
     const updatedStation = await station.findByIdAndUpdate(
       Station._id,
